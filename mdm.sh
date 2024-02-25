@@ -12,9 +12,6 @@ select opt in "${options[@]}"; do
 	case $opt in
 	"Bypass on Recovery")
 		echo -e "${GRN}Bypass on Recovery"
-		if [ -d "/Volumes/Macintosh HD - Data" ]; then
-   			diskutil rename "Macintosh HD - Data" "Data"
-		fi
 		echo -e "${GRN}Tạo người dùng mới"
         echo -e "${BLU}Nhấn Enter để chuyển bước tiếp theo, có thể không điền sẽ tự động nhận giá trị mặc định"
   		echo -e "Nhập tên người dùng (Mặc định: MAC)"
@@ -26,7 +23,10 @@ select opt in "${options[@]}"; do
   		echo -e "${BLUE}Nhập mật khẩu (mặc định: 1234)"
     	read passw
       	passw="${passw:=1234}"
-		dscl_path='/Volumes/Data/private/var/db/dslocal/nodes/Default' 
+		echo -e "${BLUE}Nhập Data Path (mặc định: /Volumes/Data)"
+		read data_path
+		data_path="${data_path:=/Volumes/Data}" 
+		dscl_path="$data_path/private/var/db/dslocal/nodes/Default" 
         echo -e "${GREEN}Đang tạo user"
   		# Create user
     	dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username"
@@ -35,7 +35,7 @@ select opt in "${options[@]}"; do
 	 	dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" RealName "$realName"
 	    dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" UniqueID "501"
 	    dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" PrimaryGroupID "20"
-		mkdir "/Volumes/Data/Users/$username"
+		mkdir "$data_path/Users/$username"
 	    dscl -f "$dscl_path" localhost -create "/Local/Default/Users/$username" NFSHomeDirectory "/Users/$username"
 	    dscl -f "$dscl_path" localhost -passwd "/Local/Default/Users/$username" "$passw"
 	    dscl -f "$dscl_path" localhost -append "/Local/Default/Groups/admin" GroupMembership $username
@@ -44,11 +44,11 @@ select opt in "${options[@]}"; do
 		echo "0.0.0.0 iprofiles.apple.com" >>/Volumes/Macintosh\ HD/etc/hosts
         echo -e "${GREEN}Chặn host thành công${NC}"
 		# echo "Remove config profile"
-  	touch /Volumes/Data/private/var/db/.AppleSetupDone
-        rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigHasActivationRecord
-	rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordFound
-	touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigProfileInstalled
-	touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordNotFound
+		touch "$data_path/private/var/db/.AppleSetupDone"
+			rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigHasActivationRecord
+		rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordFound
+		touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigProfileInstalled
+		touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordNotFound
 		echo "----------------------"
 		break
 		;;
@@ -62,10 +62,9 @@ select opt in "${options[@]}"; do
         ;;
     "Disable Notification (Recovery)")
         rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigHasActivationRecord
-	rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordFound
-	touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigProfileInstalled
-	touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordNotFound
-
+		rm -rf /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordFound
+		touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigProfileInstalled
+		touch /Volumes/Macintosh\ HD/var/db/ConfigurationProfiles/Settings/.cloudConfigRecordNotFound
         break
         ;;
 	"Check MDM Enrollment")
